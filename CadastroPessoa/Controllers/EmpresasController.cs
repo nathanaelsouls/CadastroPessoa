@@ -7,37 +7,41 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using CadastroPessoa.Data;
 using CadastroPessoa.Models;
+using CadastroPessoa.Services;
+using System.Diagnostics;
+using CadastroPessoa.Services.Exception;
 
 namespace CadastroPessoa.Controllers
 {
     public class EmpresasController : Controller
     {
-        private readonly Context _context;
+        //private readonly Context _context;
+        private readonly EmpresaService _empresaService;
 
-        public EmpresasController(Context context)
+        public EmpresasController(Context context, EmpresaService empresaService)
         {
-            _context = context;
+            //_context = context;
+            _empresaService = empresaService;
         }
 
         // GET: Empresas
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Empresas.ToListAsync());
+            return View(_empresaService.BuscarTodasEmpresasAsync());
         }
 
         // GET: Empresas/Details/5
         public async Task<IActionResult> Details(int? id)
-        {
+        {            
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não informado" });
             }
 
-            var empresa = await _context.Empresas
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var empresa = await _empresaService.BuscarIdAsync(id.Value);
             if (empresa == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
 
             return View(empresa);
@@ -49,20 +53,17 @@ namespace CadastroPessoa.Controllers
             return View();
         }
 
-        // POST: Empresas/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NomeFantasia,RazaoSocial,Cnpj,Endereco")] Empresa empresa)
+        public async Task<IActionResult> Create(Empresa empresa)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(empresa);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                var empresaCreate = await _empresaService.BuscarTodasEmpresasAsync();
+                return View(empresaCreate);
             }
-            return View(empresa);
+            await _empresaService.InserirEmpresaAsync(empresa);
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Empresas/Edit/5
@@ -70,50 +71,40 @@ namespace CadastroPessoa.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não informado" });
             }
 
-            var empresa = await _context.Empresas.FindAsync(id);
+            var empresa = await _empresaService.BuscarIdAsync(id.Value);
             if (empresa == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
             return View(empresa);
         }
 
-        // POST: Empresas/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NomeFantasia,RazaoSocial,Cnpj,Endereco")] Empresa empresa)
+        public async Task<IActionResult> Edit(int id, Empresa empresa)
         {
             if (id != empresa.Id)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id incompatível" });
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(empresa);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EmpresaExists(empresa.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                var empresaEdit = await _empresaService.BuscarTodasEmpresasAsync();
+                return View(empresaEdit);
+            }
+            try
+            {
+                await _empresaService.AtualizarEmpresaAsync(empresa);
                 return RedirectToAction(nameof(Index));
             }
-            return View(empresa);
+            catch(ApplicationException e)
+            {
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
         }
 
         // GET: Empresas/Delete/5
@@ -121,33 +112,42 @@ namespace CadastroPessoa.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não informado" });
             }
 
-            var empresa = await _context.Empresas
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var empresa = await _empresaService.BuscarIdAsync(id.Value);
             if (empresa == null)
             {
-                return NotFound();
+                return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
 
             return View(empresa);
         }
 
         // POST: Empresas/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            var empresa = await _context.Empresas.FindAsync(id);
-            _context.Empresas.Remove(empresa);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _empresaService.RemoverEmpresa(id);
+                return RedirectToAction(nameof(Index));
+            } 
+            catch(IntegrityException e)
+            {
+                return RedirectToAction(nameof(Error), new { message = e.Message });
+            }
         }
 
-        private bool EmpresaExists(int id)
+        public IActionResult Error(string message)
         {
-            return _context.Empresas.Any(e => e.Id == id);
+            var viewModel = new ErrorViewModel
+            {
+                Message = message,
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            };
+            return View(viewModel);
         }
     }
 }
