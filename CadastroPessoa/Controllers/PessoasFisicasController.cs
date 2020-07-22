@@ -1,53 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using CadastroPessoa.Data;
 using CadastroPessoa.Models;
 using CadastroPessoa.Services;
-using System.Diagnostics;
 using CadastroPessoa.Services.Exception;
+using Microsoft.AspNetCore.Mvc;
 
 namespace CadastroPessoa.Controllers
 {
-    public class EmpresasController : Controller
+    public class PessoasFisicasController : Controller
     {
-        //private readonly Context _context;
-        private readonly EmpresaService _empresaService;
+        private readonly PessoaFisicaService _pessoaFisicaService;
 
-        public EmpresasController(Context context, EmpresaService empresaService)
+        public PessoasFisicasController (PessoaFisicaService pessoaFisicaService)
         {
-            //_context = context;
-            _empresaService = empresaService;
+            _pessoaFisicaService = pessoaFisicaService;
         }
 
-        // GET: Empresas
         public async Task<IActionResult> Index()
         {
-            return View(await _empresaService.BuscarTodasEmpresasAsync());
+            var list = await _pessoaFisicaService.BuscarTodasPessoasFisicasAsync();
+            return View(list);
         }
 
-        // GET: Empresas/Details/5
         public async Task<IActionResult> Details(int? id)
-        {            
+        {
             if (id == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id não informado" });
             }
 
-            var empresa = await _empresaService.BuscarIdAsync(id.Value);
-            if (empresa == null)
+            var pessoa = await _pessoaFisicaService.BuscarIdAsync(id.Value);
+            if (pessoa == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
 
-            return View(empresa);
+            return View(pessoa);
         }
 
-        // GET: Empresas/Create
         public IActionResult Create()
         {
             return View();
@@ -55,18 +48,19 @@ namespace CadastroPessoa.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Empresa empresa)
+        public async Task<IActionResult> Create(PessoaFisica pessoaFisica)
         {
             if (!ModelState.IsValid)
             {
-                var empresaCreate = await _empresaService.BuscarTodasEmpresasAsync();
-                return View(empresaCreate);
+                var pessoaCreate = await _pessoaFisicaService.BuscarTodasPessoasFisicasAsync();
+                return View(pessoaCreate);
             }
-            await _empresaService.InserirEmpresaAsync(empresa);
+            await _pessoaFisicaService.InserirPessoaFisicaAsync(pessoaFisica);
             return RedirectToAction(nameof(Index));
+
         }
 
-        // GET: Empresas/Edit/5
+
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -74,40 +68,41 @@ namespace CadastroPessoa.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id não informado" });
             }
 
-            var empresa = await _empresaService.BuscarIdAsync(id.Value);
-            if (empresa == null)
+            var pessoa = await _pessoaFisicaService.BuscarIdAsync(id.Value);
+            if (pessoa == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
-            return View(empresa);
+
+            return View(pessoa);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Empresa empresa)
+        public async Task<IActionResult> Edit(int id, PessoaFisica pessoa)
         {
-            if (id != empresa.Id)
+            if (id != pessoa.Id)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id incompatível" });
             }
 
             if (!ModelState.IsValid)
             {
-                var empresaEdit = await _empresaService.BuscarTodasEmpresasAsync();
-                return View(empresaEdit);
+                var pessoaEdit = await _pessoaFisicaService.BuscarTodasPessoasFisicasAsync();
+                return View(pessoaEdit);
             }
             try
             {
-                await _empresaService.AtualizarEmpresaAsync(empresa);
+                await _pessoaFisicaService.AtualizarPessoaFisicaAsync(pessoa);
                 return RedirectToAction(nameof(Index));
             }
-            catch(ApplicationException e)
+            catch (ApplicationException e)
             {
                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }
+
         }
 
-        // GET: Empresas/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -115,30 +110,30 @@ namespace CadastroPessoa.Controllers
                 return RedirectToAction(nameof(Error), new { message = "Id não informado" });
             }
 
-            var empresa = await _empresaService.BuscarIdAsync(id.Value);
-            if (empresa == null)
+            var obj = await _pessoaFisicaService.BuscarIdAsync(id.Value);
+            if (obj == null)
             {
                 return RedirectToAction(nameof(Error), new { message = "Id não encontrado" });
             }
-
-            return View(empresa);
+            return View(obj);
         }
 
-        // POST: Empresas/Delete/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                await _empresaService.RemoverEmpresa(id);
+                await _pessoaFisicaService.RemoverPessoaFisicaAsync(id);
                 return RedirectToAction(nameof(Index));
-            } 
-            catch(IntegrityException e)
+            }
+            catch (IntegrityException e)
             {
                 return RedirectToAction(nameof(Error), new { message = e.Message });
             }
         }
+
+
 
         public IActionResult Error(string message)
         {

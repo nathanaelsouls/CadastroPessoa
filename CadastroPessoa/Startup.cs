@@ -29,6 +29,7 @@ namespace CadastroPessoa
 
             services.AddDbContext<Context>();
             services.AddScoped<EmpresaService>();
+            services.AddScoped<PessoaFisicaService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,7 +56,7 @@ namespace CadastroPessoa
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=PessoasFisicas}/{action=Index}/{id?}");
             });
         }
     }

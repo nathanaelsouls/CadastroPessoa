@@ -1,13 +1,13 @@
 ﻿@model IEnumerable<CadastroPessoa.Models.Empresa>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Empresas";
 }
 
-<h1>Index</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Cadastrar</a>
 </p>
 <table class="table">
     <thead>
