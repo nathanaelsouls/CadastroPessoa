@@ -30,6 +30,7 @@ namespace CadastroPessoa
             services.AddDbContext<Context>();
             services.AddScoped<EmpresaService>();
             services.AddScoped<PessoaFisicaService>();
+            services.AddScoped<PessoaJuridicaService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
