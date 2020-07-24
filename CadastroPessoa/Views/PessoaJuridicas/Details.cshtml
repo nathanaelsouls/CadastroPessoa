@@ -1,0 +1,54 @@
+﻿@model CadastroPessoa.Models.PessoaJuridica
+
+@{
+    ViewData["Title"] = "Detalhar";
+}
+
+<h1>Detalhar</h1>
+
+<div>
+    <h4>Pessoa Juridica</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DataNascimento)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DataNascimento)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Empresa.NomeFantasia)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Empresa.NomeFantasia)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Empresa.RazaoSocial)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Empresa.RazaoSocial)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Empresa.Cnpj)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Empresa.Cnpj)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Empresa.Endereco)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Empresa.Endereco)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

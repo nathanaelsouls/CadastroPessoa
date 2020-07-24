@@ -18,7 +18,7 @@ namespace CadastroPessoa.Services
             _context = context;
         }
 
-        public async Task<List<PessoaFisica>> BuscarTodasPessoasFisicasAsync()
+        public async Task<IEnumerable<PessoaFisica>> BuscarTodasPessoasFisicasAsync()
         {
             return await _context.PessoaFisicas.OrderBy(x => x.Name).ToListAsync();
         }
